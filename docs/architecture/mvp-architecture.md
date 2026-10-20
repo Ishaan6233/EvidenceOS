@@ -25,6 +25,31 @@ This is the authoritative MVP architecture. It records decisions; it does not cl
 
 Business rules live in modules/services; route handlers validate, authorize, and orchestrate rather than owning domain logic.
 
+### 2.1 Implementation status
+
+Status reflects the repository's current implementation, not the desired architecture.
+
+| Capability | Status | Evidence / next step |
+|---|---|---|
+| FastAPI application startup | Implemented | `backend/app/main.py` |
+| Environment-based settings | Implemented at scaffold level | `backend/app/core/config.py` |
+| Basic health endpoints | Implemented at scaffold level | Backend health routes and tests |
+| Automated scaffold tests | Present; must pass in the validation environment | `backend/tests/` |
+| React + TypeScript frontend | Planned / not present in the current repository snapshot | Create frontend project |
+| Authentication and tenant isolation | Planned | Implement and test authorization |
+| Document upload and versioning | Planned | Define API contract and persistence |
+| Original-file storage adapter | Planned | Implement local adapter and deployment adapter |
+| PostgreSQL schema and migrations | Planned | Add persistence models and migrations |
+| PDF, DOCX, and TXT ingestion | Planned | Implement parsing and ingestion worker |
+| Durable background jobs and retries | Planned | Implement PostgreSQL-backed job lifecycle |
+| Hybrid lexical/vector retrieval with RRF | Planned | Implement and evaluate retrieval |
+| Embedding and answer-generation adapters | Planned | Implement provider interfaces and policy |
+| Citation validation and provenance | Planned | Persist and validate source references |
+| Independent claim verification | Planned | Implement verification and evidence links |
+| Production observability and deployment | Planned | Add operational configuration and deployment validation |
+
+The existence of an architectural package directory, interface proposal, configuration setting, or diagram does not mean its corresponding product capability is implemented. Update this table only when code and appropriate tests demonstrate the capability.
+
 ### ADR-001 — FastAPI as the sole application backend
 
 **Decision — Decided:** Use Python and FastAPI as the only MVP application backend. All product routes are versioned under `/api/v1`; domain/application services remain independent of route handlers and provider SDKs.
@@ -75,6 +100,117 @@ Business rules live in modules/services; route handlers validate, authorize, and
 - **Worker process:** polls and safely claims persisted jobs, parses documents, creates source-aligned chunks, computes embeddings, updates lexical/vector indexes, and records terminal or retry state.
 - **Provider adapters:** embedding, answer generation, and claim verification are separate provider-neutral interfaces. Retrieval does not depend on an LLM vendor.
 - **Evaluation and observability:** fixed datasets and reproducible metrics; structured logs, metrics, traces, and sanitized audit events without secrets or unnecessary source text.
+
+### 3.1 Component diagram
+
+The diagram describes the **target MVP architecture**, not a claim that every component is implemented.
+
+```mermaid
+flowchart TB
+    User["User"]
+    Web["React + TypeScript client"]
+    API["FastAPI application<br/>Versioned REST API"]
+    Auth["Authentication and<br/>tenant authorization"]
+    Domain["Application / domain modules"]
+    Ingest["Ingestion service"]
+    Retrieve["Hybrid retrieval service"]
+    Generate["Answer generation"]
+    Verify["Independent claim verification"]
+    Jobs["PostgreSQL-backed job queue"]
+    Worker["Separate ingestion worker"]
+    DB[("PostgreSQL<br/>Metadata, chunks, jobs,<br/>citations, claims, pgvector")]
+    Objects[("Object storage<br/>Original document bytes")]
+    Embed["Embedding provider adapter"]
+    LLM["Generation provider adapter"]
+    Check["Verification provider adapter"]
+
+    User --> Web
+    Web --> API
+    API --> Auth
+    Auth --> Domain
+    Domain --> Ingest
+    Domain --> Retrieve
+    Domain --> Generate
+    Domain --> Verify
+    Ingest --> Objects
+    Ingest --> Jobs
+    Jobs --> Worker
+    Worker --> Objects
+    Worker --> Embed
+    Worker --> DB
+    Retrieve --> DB
+    Retrieve --> Generate
+    Generate --> LLM
+    Generate --> Verify
+    Verify --> Check
+    Verify --> DB
+    Generate --> DB
+    API --> DB
+
+    classDef implemented fill:#dcefe2,stroke:#39734d,color:#163b24
+    classDef planned fill:#fff0d6,stroke:#a66b00,color:#633d00
+    class Web,Auth,Ingest,Retrieve,Generate,Verify,Jobs,Worker,DB,Objects,Embed,LLM,Check planned
+    class API implemented
+```
+
+**Status legend:** Green means only the basic API scaffold is implemented; amber means planned target architecture. The domain, storage, database, worker, and AI components are architectural responsibilities, not currently working features merely because they appear in the diagram.
+
+### Component responsibilities
+
+| Component | Responsibility | MVP status |
+|---|---|---|
+| React + TypeScript client | Upload, ask questions, inspect answers and sources | Planned |
+| FastAPI | Request validation, API routing, orchestration | Basic scaffold implemented; product endpoints planned |
+| Authentication and tenant authorization | Enforce identity and resource access | Planned |
+| PostgreSQL + pgvector | Structured records, lexical indexes, vector retrieval | Decided; integration planned |
+| Object storage | Preserve original document bytes | Interface and implementation planned |
+| Ingestion worker | Parse, chunk, embed, and index documents asynchronously | Planned |
+| Retrieval service | Combine lexical and dense rankings using RRF | Planned |
+| Generation adapter | Generate answers from permitted evidence | Planned |
+| Verification service | Check individual claims against evidence | Planned |
+| Provenance records | Link answers and claims to stored source versions and spans | Planned |
+| Health endpoint and configuration | Basic service health and environment settings | Implemented in the scaffold |
+
+### 3.2 End-to-end data-flow diagram
+
+This diagram shows the intended workflow after the planned services are implemented.
+
+```mermaid
+flowchart TD
+    A["1. User uploads document"] --> B["2. API validates request and access"]
+    B --> C["3. Store original document"]
+    C --> D["4. Persist document version and ingestion job"]
+    D --> E["5. Worker claims job"]
+    E --> F["6. Parse document and extract text"]
+    F --> G["7. Chunk text and record source offsets"]
+    G --> H["8. Generate embeddings"]
+    G --> I["9. Persist chunks and lexical index"]
+    H --> J["10. Persist vectors"]
+    I --> K["Document becomes ready"]
+    J --> K
+
+    K --> L["11. User submits a question"]
+    L --> M["12. Authorize scope and retrieve evidence"]
+    M --> N["13. Hybrid lexical + vector search"]
+    N --> O["14. Fuse ranked candidates using RRF"]
+    O --> P["15. Generate answer from permitted evidence"]
+    P --> Q["16. Validate citations against stored chunks"]
+    Q --> R["17. Extract claims and verify independently"]
+    R --> S["18. Persist answer, citations, claims and verdicts"]
+    S --> T["19. Return answer with evidence and limitations"]
+
+    classDef planned fill:#fff0d6,stroke:#a66b00,color:#633d00
+    class A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T planned
+```
+
+#### Data and trust boundaries
+
+- Original document bytes are stored separately from searchable metadata and derived representations.
+- PostgreSQL is the authoritative store for document versions, chunk provenance, jobs, answers, citations, claims, and verification links.
+- Lexical and vector search produce candidate evidence; retrieval relevance does not itself establish factual support.
+- Generated citation identifiers are untrusted until resolved against stored chunks and immutable document versions.
+- Verification results describe support in the available evidence. A provider error or timeout is an execution failure, not a factual verdict.
+- External model calls may receive source context only when the configured provider and data-egress policy permit it.
 
 ## 4. End-to-end data flow
 
