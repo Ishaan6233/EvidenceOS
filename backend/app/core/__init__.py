@@ -1,1 +1,1 @@
-"""Cross-cutting application configuration."""
+"""Settings shared by the API and future worker process."""

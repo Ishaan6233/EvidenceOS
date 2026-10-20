@@ -1,4 +1,8 @@
-"""Environment-based application settings."""
+"""Read application settings from environment variables and optional `.env`.
+
+The API and future worker use these settings to choose safe configuration. Keep
+secret values out of source files and logs; `.env.example` contains placeholders.
+"""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

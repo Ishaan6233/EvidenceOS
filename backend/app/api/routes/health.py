@@ -1,4 +1,8 @@
-"""Liveness endpoint."""
+"""Expose a liveness check so operators can confirm the API process responds.
+
+This route does not read documents or prove that database, storage, or model
+dependencies are ready; readiness checks can be added when those exist.
+"""
 
 from fastapi import APIRouter
 
