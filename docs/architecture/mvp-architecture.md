@@ -50,6 +50,31 @@ Status reflects the repository's current implementation, not the desired archite
 
 The existence of an architectural package directory, interface proposal, configuration setting, or diagram does not mean its corresponding product capability is implemented. Update this table only when code and appropriate tests demonstrate the capability.
 
+### 2.1 Implementation status
+
+Status reflects the repository's current implementation, not the desired architecture.
+
+| Capability | Status | Evidence / next step |
+|---|---|---|
+| FastAPI application startup | Implemented | `backend/app/main.py` |
+| Environment-based settings | Implemented at scaffold level | `backend/app/core/config.py` |
+| Basic health endpoints | Implemented at scaffold level | Backend health routes and tests |
+| Automated scaffold tests | Present; must pass in the validation environment | `backend/tests/` |
+| React + TypeScript frontend | Planned / not present in the current repository snapshot | Create frontend project |
+| Authentication and tenant isolation | Planned | Implement and test authorization |
+| Document upload and versioning | Planned | Define API contract and persistence |
+| Original-file storage adapter | Planned | Implement local adapter and deployment adapter |
+| PostgreSQL schema and migrations | Planned | Add persistence models and migrations |
+| PDF, DOCX, and TXT ingestion | Planned | Implement parsing and ingestion worker |
+| Durable background jobs and retries | Planned | Implement PostgreSQL-backed job lifecycle |
+| Hybrid lexical/vector retrieval with RRF | Planned | Implement and evaluate retrieval |
+| Embedding and answer-generation adapters | Planned | Implement provider interfaces and policy |
+| Citation validation and provenance | Planned | Persist and validate source references |
+| Independent claim verification | Planned | Implement verification and evidence links |
+| Production observability and deployment | Planned | Add operational configuration and deployment validation |
+
+The existence of an architectural package directory, interface proposal, configuration setting, or diagram does not mean its corresponding product capability is implemented. Update this table only when code and appropriate tests demonstrate the capability.
+
 ### ADR-001 — FastAPI as the sole application backend
 
 **Decision — Decided:** Use Python and FastAPI as the only MVP application backend. All product routes are versioned under `/api/v1`; domain/application services remain independent of route handlers and provider SDKs.
