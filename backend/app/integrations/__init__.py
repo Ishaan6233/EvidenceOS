@@ -1,1 +1,1 @@
-"""External and local provider adapters."""
+"""Adapters at boundaries to storage and model providers."""

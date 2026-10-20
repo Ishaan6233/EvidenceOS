@@ -1,4 +1,10 @@
-"""Provider-neutral contracts; no vendor SDK is selected here."""
+"""Provider-neutral contracts for embedding, generation, and verification.
+
+Retrieval sends chunk text to an embedding implementation; answer generation
+receives only policy-approved evidence; claim verification independently checks
+claims against evidence. Implementations must enforce outbound-data policy and
+must not let vendor-specific types leak into domain or API code.
+"""
 
 from typing import Protocol, Sequence
 
