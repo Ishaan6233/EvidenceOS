@@ -39,7 +39,7 @@ Status reflects the repository's current implementation, not the desired archite
 | Authentication and tenant isolation | Planned | Implement and test authorization |
 | Document upload and versioning | Planned | Define API contract and persistence |
 | Original-file storage adapter | Planned | Implement local adapter and deployment adapter |
-| PostgreSQL schema and migrations | Planned | Add persistence models and migrations |
+| PostgreSQL schema and migrations | Initial metadata SQL migration drafted; runtime integration and migration tests planned | `backend/migrations/0001_initial_schema.sql`; add tenant-scoped repositories and fresh-database tests |
 | PDF, DOCX, and TXT ingestion | Planned | Implement parsing and ingestion worker |
 | Durable background jobs and retries | Planned | Implement PostgreSQL-backed job lifecycle |
 | Hybrid lexical/vector retrieval with RRF | Planned | Implement and evaluate retrieval |
@@ -64,7 +64,7 @@ Status reflects the repository's current implementation, not the desired archite
 | Authentication and tenant isolation | Planned | Implement and test authorization |
 | Document upload and versioning | Planned | Define API contract and persistence |
 | Original-file storage adapter | Planned | Implement local adapter and deployment adapter |
-| PostgreSQL schema and migrations | Planned | Add persistence models and migrations |
+| PostgreSQL schema and migrations | Initial metadata SQL migration drafted; runtime integration and migration tests planned | `backend/migrations/0001_initial_schema.sql`; add tenant-scoped repositories and fresh-database tests |
 | PDF, DOCX, and TXT ingestion | Planned | Implement parsing and ingestion worker |
 | Durable background jobs and retries | Planned | Implement PostgreSQL-backed job lifecycle |
 | Hybrid lexical/vector retrieval with RRF | Planned | Implement and evaluate retrieval |
