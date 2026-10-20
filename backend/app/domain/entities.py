@@ -1,4 +1,9 @@
-"""Small initial domain types; persistence schemas belong in adapters."""
+"""Define starter product types used throughout ingestion and evidence flow.
+
+`DocumentStatus` describes ingestion lifecycle. `SourceSpan` identifies where
+text came from, so future chunks and citations can resolve to exact versions
+and offsets. These are domain values, not database or HTTP schemas.
+"""
 
 from dataclasses import dataclass
 from enum import StrEnum

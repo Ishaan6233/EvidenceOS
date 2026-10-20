@@ -1,4 +1,8 @@
-"""Persistence contracts. Concrete PostgreSQL adapters are future work."""
+"""Describe how domain/application services will request persisted data.
+
+Services call these repository contracts after API authorization; concrete
+PostgreSQL implementations are future work and must scope every lookup by tenant.
+"""
 
 from typing import Protocol
 
